@@ -1,4 +1,9 @@
 # Xiaomi Air Conditioning Companion 2
+## This is a fork of the original [EugeneLiu/xiaomi_airconditioningcompanionMCN02](https://github.com/EugeneLiu/xiaomi_airconditioningcompanionMCN02). It has been updated to maintain compatibility with the 2025.6.3 versions of Home Assistant. 
+#### 🔧 Key Changes
+* **Fixed** broken `import` paths and deprecated `const` definitions.
+* **Refactored** entity classes to align with modern Home Assistant development standards.
+* **Ready** for seamless integration with HACS or manual installation.
 
 This is a custom component for home assistant to integrate the Xiaomi Mi Air Conditioning Companion 2:
 
