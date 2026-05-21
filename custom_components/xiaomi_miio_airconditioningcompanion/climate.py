@@ -18,16 +18,8 @@ from homeassistant.const import (
 from homeassistant.components.climate.const import (
     ATTR_HVAC_MODE,
     DOMAIN,
-    HVAC_MODE_OFF,
-    HVAC_MODE_HEAT,
-    HVAC_MODE_COOL,
-    HVAC_MODE_AUTO,
-    HVAC_MODE_DRY,
-    HVAC_MODE_FAN_ONLY,
-    SUPPORT_SWING_MODE,
-    SUPPORT_FAN_MODE,
-    SUPPORT_TARGET_TEMPERATURE,
 )
+from homeassistant.components.climate.const import HVACMode, ClimateEntityFeature
 from homeassistant.const import (
     ATTR_ENTITY_ID,
     ATTR_TEMPERATURE,
@@ -36,7 +28,7 @@ from homeassistant.const import (
     CONF_HOST,
     CONF_TOKEN,
     CONF_TIMEOUT,
-    TEMP_CELSIUS,
+    UnitOfTemperature,
 )
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.event import async_track_state_change
@@ -58,7 +50,7 @@ ATTR_SWING_MODE = "swing_mode"
 ATTR_FAN_MODE = "fan_mode"
 ATTR_LOAD_POWER = "load_power"
 
-SUPPORT_FLAGS = SUPPORT_TARGET_TEMPERATURE | SUPPORT_FAN_MODE | SUPPORT_SWING_MODE
+SUPPORT_FLAGS = ClimateEntityFeature.TARGET_TEMPERATURE | ClimateEntityFeature.FAN_MODE | ClimateEntityFeature.SWING_MODE
 
 CONF_SENSOR = "target_sensor"
 CONF_MIN_TEMP = "min_temp"
@@ -181,12 +173,12 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
 
 
 class OperationMode(enum.Enum):
-    Heat = HVAC_MODE_HEAT
-    Cool = HVAC_MODE_COOL
-    Auto = HVAC_MODE_AUTO
-    Dehumidify = HVAC_MODE_DRY
-    Ventilate = HVAC_MODE_FAN_ONLY
-    Off = HVAC_MODE_OFF
+    Heat = HVACMode.HEAT
+    Cool = HVACMode.COOL
+    Auto = HVACMode.AUTO
+    Dehumidify = HVACMode.DRY
+    Ventilate = HVACMode.FAN_ONLY
+    Off = HVACMode.OFF
 
 
 class XiaomiAirConditioningCompanion(ClimateEntity):
@@ -328,7 +320,7 @@ class XiaomiAirConditioningCompanion(ClimateEntity):
             )
             self._last_on_operation = OperationMode[state.mode.name].value
             if state.power == "off":
-                self._hvac_mode = HVAC_MODE_OFF
+                self._hvac_mode = HVACMode.OFF
                 self._state = False
             else:
                 self._hvac_mode = self._last_on_operation
@@ -389,7 +381,7 @@ class XiaomiAirConditioningCompanion(ClimateEntity):
     @property
     def temperature_unit(self):
         """Return the unit of measurement."""
-        return TEMP_CELSIUS
+        return UnitOfTemperature.CELSIUS
 
     @property
     def current_temperature(self):
@@ -435,7 +427,7 @@ class XiaomiAirConditioningCompanion(ClimateEntity):
             await self.async_send_command('set_tar_temp', [self._target_temperature])
         if kwargs.get(ATTR_HVAC_MODE) is not None:
             self._hvac_mode = OperationMode(kwargs.get(ATTR_HVAC_MODE))
-            mode_value = 'wind' if self._hvac_mode.value == HVAC_MODE_FAN_ONLY else self._hvac_mode.value
+            mode_value = 'wind' if self._hvac_mode.value == HVACMode.FAN_ONLY else self._hvac_mode.value
             await self.async_send_command('set_mode', [mode_value])
 
     async def async_set_swing_mode(self, swing_mode):
@@ -460,11 +452,11 @@ class XiaomiAirConditioningCompanion(ClimateEntity):
             )
             if result:
                 self._state = False
-                self._hvac_mode = HVAC_MODE_OFF
+                self._hvac_mode = HVACMode.OFF
         else:
             self._hvac_mode = OperationMode(hvac_mode)
             self._state = True
-            mode_value = 'wind' if self._hvac_mode.value == HVAC_MODE_FAN_ONLY else self._hvac_mode.value
+            mode_value = 'wind' if self._hvac_mode.value == HVACMode.FAN_ONLY else self._hvac_mode.value
             await self.async_send_command('set_mode', [mode_value])
 
     @property
